@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-color: #0b0f19;
+  --surface-color: rgba(255, 255, 255, 0.03);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.5);
+  
+  --active-color: #10b981;
+  --active-glow: rgba(16, 185, 129, 0.4);
+  --passive-color: #8b5cf6;
+  --passive-glow: rgba(139, 92, 246, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+}
+
+.glass-panel {
+  background: var(--surface-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-wrap: wrap;
+    gap: 12px !important;
+  }
+  .filter-bar button {
+    flex: 1 1 100%;
+    font-size: 14px;
+    padding: 12px 16px !important;
+  }
+  .stock-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+    padding-top: 48px !important;
+    position: relative;
+  }
+  .stock-rank {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 2rem !important;
+    opacity: 0.2;
+  }
+  .stock-right-panel {
+    margin-left: 0 !important;
+    text-align: left !important;
+    width: 100%;
+  }
+  .stock-right-panel .badges {
+    justify-content: flex-start !important;
+  }
+}
