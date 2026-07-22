@@ -42,6 +42,7 @@ export async function POST(request) {
           etfId: buy.etfId,
           etfName: buy.etfName,
           etfType: buy.etfType,
+          etfIssuer: buy.etfIssuer,
           volume: buy.netBuys
         });
       } else {
@@ -53,6 +54,7 @@ export async function POST(request) {
             etfId: buy.etfId,
             etfName: buy.etfName,
             etfType: buy.etfType,
+            etfIssuer: buy.etfIssuer,
             volume: buy.netBuys
           }]
         });

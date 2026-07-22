@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function Home() {
   const [etfs, setEtfs] = useState([]);
-  const [filter, setFilter] = useState('all'); // 'all', 'active', 'passive'
+  const [selectedEtfIds, setSelectedEtfIds] = useState(new Set());
   const [buys, setBuys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   // Fetch ETF list on mount
   useEffect(() => {
@@ -13,25 +14,27 @@ export default function Home() {
       .then(res => res.json())
       .then(data => {
         setEtfs(data);
+        // Initially select all
+        setSelectedEtfIds(new Set(data.map(e => e.id)));
       })
       .catch(err => console.error(err));
   }, []);
 
-  // Fetch buys whenever filter or ETF list changes
+  // Fetch buys whenever selectedEtfIds changes
   useEffect(() => {
     if (etfs.length === 0) return;
-
-    let targetEtfs = etfs;
-    if (filter === 'active') targetEtfs = etfs.filter(e => e.type === 'active');
-    if (filter === 'passive') targetEtfs = etfs.filter(e => e.type === 'passive');
-
-    const etfIds = targetEtfs.map(e => e.id);
+    
+    if (selectedEtfIds.size === 0) {
+      setBuys([]);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     fetch('/api/etf-buys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ etfIds })
+      body: JSON.stringify({ etfIds: Array.from(selectedEtfIds) })
     })
       .then(res => res.json())
       .then(data => {
@@ -42,7 +45,39 @@ export default function Home() {
         console.error(err);
         setLoading(false);
       });
-  }, [filter, etfs]);
+  }, [selectedEtfIds, etfs]);
+
+  // Group ETFs by issuer
+  const etfsByIssuer = useMemo(() => {
+    const grouped = {};
+    etfs.forEach(etf => {
+      if (!grouped[etf.issuer]) grouped[etf.issuer] = [];
+      grouped[etf.issuer].push(etf);
+    });
+    return grouped;
+  }, [etfs]);
+
+  const handleSelectPreset = (preset) => {
+    if (preset === 'all') {
+      setSelectedEtfIds(new Set(etfs.map(e => e.id)));
+    } else if (preset === 'active') {
+      setSelectedEtfIds(new Set(etfs.filter(e => e.type === 'active').map(e => e.id)));
+    } else if (preset === 'passive') {
+      setSelectedEtfIds(new Set(etfs.filter(e => e.type === 'passive').map(e => e.id)));
+    } else if (preset === 'clear') {
+      setSelectedEtfIds(new Set());
+    }
+  };
+
+  const toggleEtf = (id) => {
+    const newSet = new Set(selectedEtfIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedEtfIds(newSet);
+  };
 
   return (
     <main style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -55,45 +90,89 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Filter Bar */}
-      <section className="glass-panel animate-fade-in filter-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', justifyContent: 'center', animationDelay: '0.1s' }}>
+      {/* Filter Presets */}
+      <section className="glass-panel animate-fade-in filter-bar" style={{ display: 'flex', gap: '16px', marginBottom: '24px', justifyContent: 'center', animationDelay: '0.1s' }}>
         <button 
-          onClick={() => setFilter('all')}
+          onClick={() => handleSelectPreset('all')}
           style={{
             padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--surface-border)',
-            background: filter === 'all' ? 'var(--accent-glow)' : 'transparent',
-            color: filter === 'all' ? '#fff' : 'var(--text-secondary)',
+            background: selectedEtfIds.size === etfs.length ? 'var(--accent-glow)' : 'transparent',
+            color: selectedEtfIds.size === etfs.length ? '#fff' : 'var(--text-secondary)',
             cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s'
           }}>
-          全市場 ETF
+          全選所有 ETF
         </button>
         <button 
-          onClick={() => setFilter('active')}
+          onClick={() => handleSelectPreset('active')}
           style={{
             padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--surface-border)',
-            background: filter === 'active' ? 'var(--active-glow)' : 'transparent',
-            color: filter === 'active' ? '#fff' : 'var(--text-secondary)',
+            background: 'transparent', color: 'var(--active-color)', borderColor: 'var(--active-color)',
             cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s'
           }}>
-          主動式 ETF (Active)
+          選取主動式
         </button>
         <button 
-          onClick={() => setFilter('passive')}
+          onClick={() => handleSelectPreset('passive')}
           style={{
             padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--surface-border)',
-            background: filter === 'passive' ? 'var(--passive-glow)' : 'transparent',
-            color: filter === 'passive' ? '#fff' : 'var(--text-secondary)',
+            background: 'transparent', color: 'var(--passive-color)', borderColor: 'var(--passive-color)',
             cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s'
           }}>
-          被動式 ETF (Passive)
+          選取被動式
+        </button>
+        <button 
+          onClick={() => setIsSelectorOpen(!isSelectorOpen)}
+          style={{
+            padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--surface-border)',
+            background: 'var(--surface-color)', color: '#fff',
+            cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s', marginLeft: 'auto'
+          }}>
+          {isSelectorOpen ? '收起詳細選單' : '展開自訂選擇器 ▼'}
         </button>
       </section>
+
+      {/* Advanced Selector */}
+      {isSelectorOpen && (
+        <section className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0s' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '1.2rem', margin: 0 }}>依發行券商勾選</h3>
+            <button onClick={() => handleSelectPreset('clear')} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>清除全部</button>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
+            {Object.entries(etfsByIssuer).map(([issuer, issuerEtfs]) => (
+              <div key={issuer} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
+                <h4 style={{ color: 'var(--accent-color)', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--surface-border)' }}>{issuer}</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {issuerEtfs.map(etf => (
+                    <label key={etf.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedEtfIds.has(etf.id)}
+                        onChange={() => toggleEtf(etf.id)}
+                        style={{ accentColor: etf.type === 'active' ? 'var(--active-color)' : 'var(--passive-color)' }}
+                      />
+                      <span style={{ color: etf.type === 'active' ? 'var(--active-color)' : 'var(--text-primary)' }}>
+                        {etf.id} {etf.name} {etf.type === 'active' && '(主動)'}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Top Buys Board */}
       <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-            載入資料中...
+            計算資料中...
+          </div>
+        ) : buys.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+            請至少選擇一檔 ETF
           </div>
         ) : (
           <div style={{ display: 'grid', gap: '16px' }}>
@@ -119,20 +198,20 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="stock-right-panel" style={{ marginLeft: '24px', textAlign: 'right', minWidth: '150px' }}>
+                <div className="stock-right-panel" style={{ marginLeft: '24px', textAlign: 'right', minWidth: '250px' }}>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981', marginBottom: '8px' }}>
                     +{buy.totalNetBuys.toLocaleString()} 股
                   </div>
                   
                   {/* ETF Badges */}
-                  <div className="badges" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <div className="badges" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {buy.boughtBy.map(b => (
                       <span key={b.etfId} style={{ 
-                        fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px',
+                        fontSize: '0.7rem', padding: '4px 6px', borderRadius: '4px',
                         background: b.etfType === 'active' ? 'var(--active-glow)' : 'var(--passive-glow)',
                         color: '#fff', border: `1px solid ${b.etfType === 'active' ? 'var(--active-color)' : 'var(--passive-color)'}`
-                      }}>
-                        {b.etfName}
+                      }} title={b.etfIssuer}>
+                        {b.etfId} {b.etfName}
                       </span>
                     ))}
                   </div>
