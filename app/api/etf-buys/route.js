@@ -42,6 +42,8 @@ export async function POST(request) {
           etfId: buy.etfId,
           etfName: buy.etfName,
           etfType: buy.etfType,
+          etfCategory: buy.etfCategory,
+          rebalanceMonths: buy.rebalanceMonths,
           etfIssuer: buy.etfIssuer,
           volume: buy.netBuys
         });
@@ -54,6 +56,8 @@ export async function POST(request) {
             etfId: buy.etfId,
             etfName: buy.etfName,
             etfType: buy.etfType,
+            etfCategory: buy.etfCategory,
+            rebalanceMonths: buy.rebalanceMonths,
             etfIssuer: buy.etfIssuer,
             volume: buy.netBuys
           }]
