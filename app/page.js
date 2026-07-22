@@ -7,6 +7,8 @@ export default function Home() {
   const [buys, setBuys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [viewingEtf, setViewingEtf] = useState(null);
+  const [holdingsData, setHoldingsData] = useState(null);
 
   // Fetch ETF list on mount
   useEffect(() => {
@@ -79,6 +81,20 @@ export default function Home() {
     setSelectedEtfIds(newSet);
   };
 
+  const handleViewEtf = async (id) => {
+    setViewingEtf(id);
+    setHoldingsData(null);
+    try {
+      const res = await fetch(`/api/etf-holdings?id=${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHoldingsData(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <main style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
       <header className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '40px' }}>
@@ -148,17 +164,26 @@ export default function Home() {
                 <h4 style={{ color: 'var(--accent-color)', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--surface-border)' }}>{issuer}</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {issuerEtfs.map(etf => (
-                    <label key={etf.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedEtfIds.has(etf.id)}
-                        onChange={() => toggleEtf(etf.id)}
-                        style={{ accentColor: etf.type === 'active' ? 'var(--active-color)' : 'var(--passive-color)' }}
-                      />
-                      <span style={{ color: etf.type === 'active' ? 'var(--active-color)' : 'var(--text-primary)' }}>
-                        {etf.id} {etf.name} {etf.type === 'active' && '(主動)'}
-                      </span>
-                    </label>
+                    <div key={etf.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: 1 }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedEtfIds.has(etf.id)}
+                          onChange={() => toggleEtf(etf.id)}
+                          style={{ accentColor: etf.type === 'active' ? 'var(--active-color)' : 'var(--passive-color)' }}
+                        />
+                        <span style={{ color: etf.type === 'active' ? 'var(--active-color)' : 'var(--text-primary)' }}>
+                          {etf.id} {etf.name} {etf.type === 'active' && '(主動)'}
+                        </span>
+                      </label>
+                      <button 
+                        onClick={() => handleViewEtf(etf.id)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', opacity: 0.7, padding: '4px' }}
+                        title="查看持股明細"
+                      >
+                        🔍
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -229,12 +254,18 @@ export default function Home() {
                   {/* ETF Badges */}
                   <div className="badges" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {buy.boughtBy.map(b => (
-                      <span key={b.etfId} style={{ 
-                        fontSize: '0.7rem', padding: '4px 6px', borderRadius: '4px',
-                        background: b.etfType === 'active' ? 'var(--active-glow)' : 'var(--passive-glow)',
-                        color: '#fff', border: `1px solid ${b.etfType === 'active' ? 'var(--active-color)' : 'var(--passive-color)'}`
-                      }} title={b.etfIssuer}>
-                        {b.etfId} {b.etfName}
+                      <span 
+                        key={b.etfId} 
+                        onClick={() => handleViewEtf(b.etfId)}
+                        style={{ 
+                          fontSize: '0.7rem', padding: '4px 6px', borderRadius: '4px',
+                          background: b.etfType === 'active' ? 'var(--active-glow)' : 'var(--passive-glow)',
+                          color: '#fff', border: `1px solid ${b.etfType === 'active' ? 'var(--active-color)' : 'var(--passive-color)'}`,
+                          cursor: 'pointer'
+                        }} 
+                        title={`查看 ${b.etfIssuer} ${b.etfName} 持股明細`}
+                      >
+                        🔍 {b.etfId} {b.etfName}
                       </span>
                     ))}
                   </div>
@@ -244,6 +275,84 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Holdings Modal */}
+      {viewingEtf && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
+        }} onClick={() => setViewingEtf(null)}>
+          <div className="glass-panel animate-fade-in" style={{
+            background: 'var(--bg-color)', width: '100%', maxWidth: '900px', maxHeight: '90vh',
+            overflowY: 'auto', borderRadius: '16px', padding: '32px', position: 'relative',
+            border: '1px solid var(--surface-border)'
+          }} onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setViewingEtf(null)}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer' }}
+            >
+              ✕
+            </button>
+            
+            {!holdingsData ? (
+              <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
+                載入持股資料中...
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '2rem', margin: '0 0 8px 0', color: holdingsData.type === 'active' ? 'var(--active-color)' : 'var(--passive-color)' }}>
+                    {holdingsData.name} ({holdingsData.etfId})
+                  </h2>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                    發行券商：{holdingsData.issuer} | 類型：{holdingsData.type === 'active' ? '主動式' : '被動式'}
+                  </div>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}>
+                        <th style={{ padding: '12px', textAlign: 'left' }}>股票名稱</th>
+                        <th style={{ padding: '12px' }}>權重 (%)</th>
+                        <th style={{ padding: '12px' }}>目前持股 (張)</th>
+                        <th style={{ padding: '12px' }}>1日增減</th>
+                        <th style={{ padding: '12px' }}>3日增減</th>
+                        <th style={{ padding: '12px' }}>5日增減</th>
+                        <th style={{ padding: '12px' }}>10日增減</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {holdingsData.holdings.map(h => {
+                        const renderDiff = (val) => {
+                          if (val > 0) return <span style={{ color: '#ef4444', fontWeight: 'bold' }}>+{val.toLocaleString()}</span>;
+                          if (val < 0) return <span style={{ color: '#10b981', fontWeight: 'bold' }}>{val.toLocaleString()}</span>;
+                          return <span style={{ color: 'var(--text-secondary)' }}>0</span>;
+                        };
+                        return (
+                          <tr key={h.ticker} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '12px', textAlign: 'left' }}>
+                              <strong style={{ color: 'var(--text-primary)' }}>{h.name}</strong> <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{h.ticker}</span>
+                            </td>
+                            <td style={{ padding: '12px' }}>{h.weight}%</td>
+                            <td style={{ padding: '12px' }}>{h.currentShares.toLocaleString()}</td>
+                            <td style={{ padding: '12px' }}>{renderDiff(h.diff1d)}</td>
+                            <td style={{ padding: '12px' }}>{renderDiff(h.diff3d)}</td>
+                            <td style={{ padding: '12px' }}>{renderDiff(h.diff5d)}</td>
+                            <td style={{ padding: '12px' }}>{renderDiff(h.diff10d)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
