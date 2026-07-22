@@ -14,11 +14,17 @@ export default function Home() {
   const [sortOrder, setSortOrder] = useState('desc');
   const [expandedStocks, setExpandedStocks] = useState(new Set());
   const selectorRef = useRef(null);
+  const buttonRef = useRef(null);
 
   // Click outside to collapse custom selector
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+      if (
+        selectorRef.current && 
+        !selectorRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
         setIsSelectorOpen(false);
       }
     };
@@ -257,13 +263,14 @@ export default function Home() {
           🔵 被動市值/一般
         </button>
         <button 
-          onClick={() => setIsSelectorOpen(!isSelectorOpen)}
+          ref={buttonRef}
+          onClick={() => setIsSelectorOpen(prev => !prev)}
           style={{
             padding: '10px 18px', borderRadius: '8px', border: '1px solid var(--surface-border)',
             background: 'var(--surface-color)', color: '#fff',
             cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s', marginLeft: 'auto'
           }}>
-          {isSelectorOpen ? '收起詳細選單' : '展開自訂選擇器 ▼'}
+          {isSelectorOpen ? '收起詳細選單 ▲' : '展開自訂選擇器 ▼'}
         </button>
       </section>
 
@@ -506,6 +513,12 @@ export default function Home() {
                           </div>
                         </div>
 
+                        {/* Portfolio Summary Banner */}
+                        <div style={{ background: 'rgba(56, 189, 248, 0.08)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.85rem' }}>
+                          <span style={{ color: '#38bdf8', fontWeight: 600 }}>💼 ETF 基金總資產水位分配（共 30 檔成分股，合計 100.00%）</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>註：「持股比例 (%)」指該股票佔此 ETF 總水位的資產分配權重</span>
+                        </div>
+
                         {/* Holdings Table */}
                         <div style={{ overflowX: 'auto' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.9rem' }}>
@@ -513,7 +526,7 @@ export default function Home() {
                               <tr style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}>
                                 {[
                                   { key: 'name', label: '股票名稱', align: 'left' },
-                                  { key: 'weight', label: '權重 (%)', align: 'right' },
+                                  { key: 'weight', label: '持股比例 (%)', align: 'right' },
                                   { key: 'currentShares', label: '目前持股 (張)', align: 'right' },
                                   { key: 'diff1d', label: '1日增減', align: 'right' },
                                   { key: 'diff3d', label: '3日增減', align: 'right' },
