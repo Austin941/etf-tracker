@@ -267,80 +267,6 @@ export default function Home() {
         </button>
       </section>
 
-      {/* Live Rebalance Additions & Deletions Radar Board */}
-      <section className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0.15s' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h3 style={{ fontSize: '1.4rem', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              ⚡ ETF 換股風向球 (預計/正在納入與剔除股票)
-            </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-              時時追蹤法人持股增減、成分股調整預測與即時建倉/出清進度
-            </p>
-          </div>
-          <span style={{ fontSize: '0.8rem', padding: '4px 10px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid #10b981' }}>
-            🟢 實時連線比對中
-          </span>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          {/* Additions Column */}
-          <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-            <h4 style={{ color: '#10b981', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              📥 預計 / 正在納入股票 (加碼買進)
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {radarData.additions.map((item, idx) => (
-                <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                      <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{item.name}</strong>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.ticker}</span>
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '4px' }}>
-                      目标 ETF: {item.etfId} {item.etfName}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#10b981' }}>
-                      +{item.estVolume.toLocaleString()} 張
-                    </div>
-                    <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', marginTop: '4px', display: 'inline-block' }}>
-                      {item.status} ({item.confidence}%)
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Deletions Column */}
-          <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-            <h4 style={{ color: '#ef4444', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              📤 預計 / 正在剔除股票 (減碼賣出)
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {radarData.deletions.map((item, idx) => (
-                <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                      <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{item.name}</strong>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.ticker}</span>
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '4px' }}>
-                      目标 ETF: {item.etfId} {item.etfName}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ef4444' }}>
-                      -{item.estVolume.toLocaleString()} 張
-                    </div>
-                    <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', marginTop: '4px', display: 'inline-block' }}>
-                      {item.status} ({item.confidence}%)
-                    </span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -526,28 +452,28 @@ export default function Home() {
       )}
     </section>
 
-      {/* Holdings Modal */}
+      {/* Holdings Modal with Right Extension Side Panel */}
       {viewingEtf && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
         }} onClick={() => setViewingEtf(null)}>
           <div className="glass-panel animate-fade-in" style={{
-            background: 'var(--bg-color)', width: '100%', maxWidth: '900px', maxHeight: '90vh',
-            overflowY: 'auto', borderRadius: '16px', padding: '32px', position: 'relative',
+            background: 'var(--bg-color)', width: '100%', maxWidth: '1200px', maxHeight: '92vh',
+            overflowY: 'auto', borderRadius: '16px', padding: '28px', position: 'relative',
             border: '1px solid var(--surface-border)'
           }} onClick={e => e.stopPropagation()}>
             <button 
               onClick={() => setViewingEtf(null)}
-              style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer', zIndex: 10 }}
             >
               ✕
             </button>
             
             {!holdingsData ? (
               <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-                載入持股資料中...
+                載入持股與換股預測資料中...
               </div>
             ) : (
               <div>
@@ -555,111 +481,158 @@ export default function Home() {
                   const catInfo = getEtfCategoryInfo(holdingsData.type, holdingsData.category);
                   const isRebalNow = isRebalancingMonth(holdingsData.rebalanceMonths);
                   return (
-                    <>
-                      <div style={{ marginBottom: '24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                          <h2 style={{ fontSize: '2rem', margin: 0, color: catInfo.color }}>
-                            {holdingsData.name} ({holdingsData.etfId})
-                          </h2>
-                          <span style={{ 
-                            padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
-                            background: catInfo.bg, color: catInfo.color, border: `1px solid ${catInfo.border}`
-                          }}>
-                            {catInfo.emoji} {catInfo.label}
-                          </span>
+                    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                      
+                      {/* Left Main Section: Header + Component Table */}
+                      <div style={{ flex: '1 1 64%', minWidth: '320px' }}>
+                        <div style={{ marginBottom: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                            <h2 style={{ fontSize: '1.8rem', margin: 0, color: catInfo.color }}>
+                              {holdingsData.name} ({holdingsData.etfId})
+                            </h2>
+                            <span style={{ 
+                              padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
+                              background: catInfo.bg, color: catInfo.color, border: `1px solid ${catInfo.border}`
+                            }}>
+                              {catInfo.emoji} {catInfo.label}
+                            </span>
+                          </div>
+
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <span>發行券商：<strong style={{ color: '#fff' }}>{holdingsData.issuer}</strong></span>
+                            <span>📅 預計換股月份：<strong style={{ color: '#fff' }}>{getRebalanceText(holdingsData.rebalanceMonths)}</strong></span>
+                            {isRebalNow && (
+                              <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#ef4444', color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                                🚨 本月預計進行持股調整 / 換股！
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <span>發行券商：<strong style={{ color: '#fff' }}>{holdingsData.issuer}</strong></span>
-                          <span>📅 預計換股月份：<strong style={{ color: '#fff' }}>{getRebalanceText(holdingsData.rebalanceMonths)}</strong></span>
-                          {isRebalNow && (
-                            <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#ef4444', color: '#fff', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                              🚨 本月預計進行持股調整 / 換股！
-                            </span>
-                          )}
+                        {/* Holdings Table */}
+                        <div style={{ overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.9rem' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}>
+                                {[
+                                  { key: 'name', label: '股票名稱', align: 'left' },
+                                  { key: 'weight', label: '權重 (%)', align: 'right' },
+                                  { key: 'currentShares', label: '目前持股 (張)', align: 'right' },
+                                  { key: 'diff1d', label: '1日增減', align: 'right' },
+                                  { key: 'diff3d', label: '3日增減', align: 'right' },
+                                  { key: 'diff5d', label: '5日增減', align: 'right' },
+                                  { key: 'diff10d', label: '10日增減', align: 'right' },
+                                ].map(col => (
+                                  <th 
+                                    key={col.key}
+                                    onClick={() => handleSort(col.key)}
+                                    style={{ 
+                                      padding: '10px', textAlign: col.align, cursor: 'pointer',
+                                      userSelect: 'none', color: sortKey === col.key ? 'var(--accent-color)' : 'var(--text-secondary)'
+                                    }}
+                                  >
+                                    {col.label} {sortKey === col.key ? (sortOrder === 'desc' ? '▼' : '▲') : ''}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sortedHoldings.map(h => {
+                                const renderDiff = (val) => {
+                                  if (val > 0) return <span style={{ color: '#ef4444', fontWeight: 'bold' }}>+{val.toLocaleString()}</span>;
+                                  if (val < 0) return <span style={{ color: '#10b981', fontWeight: 'bold' }}>{val.toLocaleString()}</span>;
+                                  return <span style={{ color: 'var(--text-secondary)' }}>0</span>;
+                                };
+                                return (
+                                  <tr key={h.ticker} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '10px', textAlign: 'left' }}>
+                                      <strong style={{ color: 'var(--text-primary)' }}>{h.name}</strong> <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{h.ticker}</span>
+                                    </td>
+                                    <td style={{ padding: '10px' }}>{h.weight}%</td>
+                                    <td style={{ padding: '10px' }}>{h.currentShares.toLocaleString()}</td>
+                                    <td style={{ padding: '10px' }}>{renderDiff(h.diff1d)}</td>
+                                    <td style={{ padding: '10px' }}>{renderDiff(h.diff3d)}</td>
+                                    <td style={{ padding: '10px' }}>{renderDiff(h.diff5d)}</td>
+                                    <td style={{ padding: '10px' }}>{renderDiff(h.diff10d)}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
 
-                      {/* ETF Specific Rebalance Additions & Deletions Cards */}
-                      {(holdingsData.rebalanceAdditions || holdingsData.rebalanceDeletions) && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                            <h4 style={{ color: '#10b981', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📥 本期預計/正在納入成員</h4>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                              {holdingsData.rebalanceAdditions.map((item, idx) => (
-                                <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #10b981', color: '#10b981', fontSize: '0.8rem' }}>
-                                  + {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                            <h4 style={{ color: '#ef4444', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📤 本期預計/正在剔除成員</h4>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                              {holdingsData.rebalanceDeletions.map((item, idx) => (
-                                <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.8rem' }}>
-                                  - {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
+                      {/* Right Extension Side Panel: Live Rebalance Additions & Deletions */}
+                      <div style={{ 
+                        flex: '1 1 300px', maxWidth: '380px', background: 'rgba(0,0,0,0.3)', 
+                        borderRadius: '12px', padding: '20px', border: '1px solid var(--surface-border)',
+                        display: 'flex', flexDirection: 'column', gap: '20px'
+                      }}>
+                        <div style={{ borderBottom: '1px solid var(--surface-border)', paddingBottom: '12px' }}>
+                          <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            ⚡ 換股動向延伸視窗
+                          </h3>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            即時比對追蹤籌碼變化
+                          </span>
                         </div>
-                      )}
-                    </>
+
+                        {/* Additions Card */}
+                        <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                          <h4 style={{ color: '#10b981', margin: '0 0 12px 0', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            📥 本期預計 / 正在納入成員
+                          </h4>
+                          {!holdingsData.rebalanceAdditions || holdingsData.rebalanceAdditions.length === 0 ? (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>暫無納入異動</span>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {holdingsData.rebalanceAdditions.map((item, idx) => (
+                                <div key={idx} style={{ background: 'rgba(0,0,0,0.4)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div>
+                                    <strong style={{ color: '#fff', fontSize: '0.9rem' }}>+ {item.name}</strong>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: '4px' }}>{item.ticker}</span>
+                                    <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '2px' }}>{item.status}</div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>+{item.estVolume.toLocaleString()}張</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Deletions Card */}
+                        <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                          <h4 style={{ color: '#ef4444', margin: '0 0 12px 0', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            📤 本期預計 / 正在剔除成員
+                          </h4>
+                          {!holdingsData.rebalanceDeletions || holdingsData.rebalanceDeletions.length === 0 ? (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>暫無剔除異動</span>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {holdingsData.rebalanceDeletions.map((item, idx) => (
+                                <div key={idx} style={{ background: 'rgba(0,0,0,0.4)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div>
+                                    <strong style={{ color: '#fff', fontSize: '0.9rem' }}>- {item.name}</strong>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: '4px' }}>{item.ticker}</span>
+                                    <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '2px' }}>{item.status}</div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>-{item.estVolume.toLocaleString()}張</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+
+                    </div>
                   );
                 })()}
 
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}>
-                        {[
-                          { key: 'name', label: '股票名稱', align: 'left' },
-                          { key: 'weight', label: '權重 (%)', align: 'right' },
-                          { key: 'currentShares', label: '目前持股 (張)', align: 'right' },
-                          { key: 'diff1d', label: '1日增減', align: 'right' },
-                          { key: 'diff3d', label: '3日增減', align: 'right' },
-                          { key: 'diff5d', label: '5日增減', align: 'right' },
-                          { key: 'diff10d', label: '10日增減', align: 'right' },
-                        ].map(col => (
-                          <th 
-                            key={col.key}
-                            onClick={() => handleSort(col.key)}
-                            style={{ 
-                              padding: '12px', textAlign: col.align, cursor: 'pointer',
-                              userSelect: 'none', color: sortKey === col.key ? 'var(--accent-color)' : 'var(--text-secondary)'
-                            }}
-                          >
-                            {col.label} {sortKey === col.key ? (sortOrder === 'desc' ? '▼' : '▲') : ''}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sortedHoldings.map(h => {
-                        const renderDiff = (val) => {
-                          if (val > 0) return <span style={{ color: '#ef4444', fontWeight: 'bold' }}>+{val.toLocaleString()}</span>;
-                          if (val < 0) return <span style={{ color: '#10b981', fontWeight: 'bold' }}>{val.toLocaleString()}</span>;
-                          return <span style={{ color: 'var(--text-secondary)' }}>0</span>;
-                        };
-                        return (
-                          <tr key={h.ticker} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '12px', textAlign: 'left' }}>
-                              <strong style={{ color: 'var(--text-primary)' }}>{h.name}</strong> <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{h.ticker}</span>
-                            </td>
-                            <td style={{ padding: '12px' }}>{h.weight}%</td>
-                            <td style={{ padding: '12px' }}>{h.currentShares.toLocaleString()}</td>
-                            <td style={{ padding: '12px' }}>{renderDiff(h.diff1d)}</td>
-                            <td style={{ padding: '12px' }}>{renderDiff(h.diff3d)}</td>
-                            <td style={{ padding: '12px' }}>{renderDiff(h.diff5d)}</td>
-                            <td style={{ padding: '12px' }}>{renderDiff(h.diff10d)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
               </div>
             )}
           </div>
