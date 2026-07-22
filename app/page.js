@@ -85,9 +85,12 @@ export default function Home() {
         <h1 className="text-gradient" style={{ fontSize: '3rem', marginBottom: '16px' }}>
           全市場 ETF 買賣追蹤網
         </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '8px' }}>
           即時追蹤主動與被動 ETF 經理人當日買進作多的股票
         </p>
+        <div style={{ display: 'inline-block', background: 'var(--surface-color)', padding: '6px 16px', borderRadius: '20px', color: 'var(--accent-color)', fontWeight: 600, fontSize: '0.9rem', border: '1px solid var(--surface-border)' }}>
+          📅 今日資料日期：{new Date().toLocaleDateString('zh-TW')}
+        </div>
       </header>
 
       {/* Filter Presets */}
@@ -175,12 +178,32 @@ export default function Home() {
             請至少選擇一檔 ETF
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: '16px' }}>
-            {buys.map((buy, index) => (
-              <div key={buy.ticker} className="glass-panel stock-row" style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
-                <div className="stock-rank" style={{ width: '40px', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
-                  #{index + 1}
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* 🏆 Today's Champion Highlight Card */}
+            <div className="glass-panel animate-fade-in" style={{ padding: '32px', border: '2px solid var(--accent-color)', background: 'linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(0,0,0,0) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '-20px', left: '-20px', fontSize: '120px', opacity: 0.05, transform: 'rotate(-15deg)' }}>🏆</div>
+              <h3 style={{ color: 'var(--accent-color)', margin: '0 0 16px 0', fontSize: '1.2rem', letterSpacing: '2px' }}>🏆 今日 ETF 買入總冠軍</h3>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', justifyContent: 'center' }}>
+                <h2 style={{ fontSize: '3.5rem', margin: 0, textShadow: '0 0 20px var(--accent-glow)' }}>{buys[0].name}</h2>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '1.5rem' }}>{buys[0].ticker}</span>
+              </div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981', marginTop: '16px' }}>
+                +{Math.round(buys[0].totalNetBuys / 1000).toLocaleString()} 張
+              </div>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '12px', fontSize: '0.9rem' }}>
+                獲得 {buys[0].boughtBy.length} 檔 ETF 青睞買進
+              </p>
+            </div>
+
+            <h3 style={{ margin: '16px 0 0 0', color: 'var(--text-secondary)', fontSize: '1.1rem' }}>📋 其他熱門買進排行</h3>
+            
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {buys.slice(1).map((buy, index) => (
+                <div key={buy.ticker} className="glass-panel stock-row" style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
+                  <div className="stock-rank" style={{ width: '40px', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+                    #{index + 2}
+                  </div>
                 <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
                     <h2 style={{ fontSize: '1.5rem', margin: 0 }}>{buy.name}</h2>
@@ -200,7 +223,7 @@ export default function Home() {
 
                 <div className="stock-right-panel" style={{ marginLeft: '24px', textAlign: 'right', minWidth: '250px' }}>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981', marginBottom: '8px' }}>
-                    +{buy.totalNetBuys.toLocaleString()} 股
+                    +{Math.round(buy.totalNetBuys / 1000).toLocaleString()} 張
                   </div>
                   
                   {/* ETF Badges */}
