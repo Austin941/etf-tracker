@@ -267,10 +267,7 @@ export default function Home() {
         </button>
       </section>
 
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Advanced Selector */}
       {isSelectorOpen && (
         <section ref={selectorRef} className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
