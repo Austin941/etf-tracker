@@ -178,10 +178,14 @@ export default function Home() {
                       </label>
                       <button 
                         onClick={() => handleViewEtf(etf.id)}
-                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', opacity: 0.7, padding: '4px' }}
+                        style={{ 
+                          background: 'rgba(56,189,248,0.15)', border: '1px solid var(--accent-color)', 
+                          color: 'var(--accent-color)', borderRadius: '6px', cursor: 'pointer', 
+                          padding: '2px 8px', fontSize: '0.75rem', fontWeight: 600
+                        }}
                         title="查看持股明細"
                       >
-                        🔍
+                        📊 明細
                       </button>
                     </div>
                   ))}
@@ -216,9 +220,26 @@ export default function Home() {
               <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981', marginTop: '16px' }}>
                 +{Math.round(buys[0].totalNetBuys / 1000).toLocaleString()} 張
               </div>
-              <p style={{ color: 'var(--text-secondary)', marginTop: '12px', fontSize: '0.9rem' }}>
-                獲得 {buys[0].boughtBy.length} 檔 ETF 青睞買進
+              <p style={{ color: 'var(--text-secondary)', marginTop: '12px', fontSize: '0.9rem', marginBottom: '8px' }}>
+                獲得 {buys[0].boughtBy.length} 檔 ETF 青睞買進：
               </p>
+              <div className="badges" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {buys[0].boughtBy.map(b => (
+                  <span 
+                    key={b.etfId} 
+                    onClick={() => handleViewEtf(b.etfId)}
+                    style={{ 
+                      fontSize: '0.75rem', padding: '4px 8px', borderRadius: '6px',
+                      background: b.etfType === 'active' ? 'var(--active-glow)' : 'var(--passive-glow)',
+                      color: '#fff', border: `1px solid ${b.etfType === 'active' ? 'var(--active-color)' : 'var(--passive-color)'}`,
+                      cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                    }} 
+                    title={`查看 ${b.etfIssuer} ${b.etfName} 持股明細`}
+                  >
+                    📊 {b.etfId} {b.etfName}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <h3 style={{ margin: '16px 0 0 0', color: 'var(--text-secondary)', fontSize: '1.1rem' }}>📋 其他熱門買進排行</h3>
