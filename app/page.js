@@ -9,6 +9,7 @@ export default function Home() {
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [viewingEtf, setViewingEtf] = useState(null);
   const [holdingsData, setHoldingsData] = useState(null);
+  const [radarData, setRadarData] = useState({ additions: [], deletions: [] });
   const [sortKey, setSortKey] = useState('weight');
   const [sortOrder, setSortOrder] = useState('desc');
   const [expandedStocks, setExpandedStocks] = useState(new Set());
@@ -31,7 +32,7 @@ export default function Home() {
     };
   }, [isSelectorOpen]);
 
-  // Fetch ETF list on mount
+  // Fetch ETF list and radar data on mount
   useEffect(() => {
     fetch('/api/etfs')
       .then(res => res.json())
@@ -40,6 +41,11 @@ export default function Home() {
         // Initially select all
         setSelectedEtfIds(new Set(data.map(e => e.id)));
       })
+      .catch(err => console.error(err));
+
+    fetch('/api/rebalance-radar')
+      .then(res => res.json())
+      .then(data => setRadarData(data))
       .catch(err => console.error(err));
   }, []);
 
@@ -194,8 +200,11 @@ export default function Home() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '8px' }}>
           即時追蹤主動與被動 ETF 經理人當日買進作多的股票
         </p>
-        <div style={{ display: 'inline-block', background: 'var(--surface-color)', padding: '6px 16px', borderRadius: '20px', color: 'var(--accent-color)', fontWeight: 600, fontSize: '0.9rem', border: '1px solid var(--surface-border)' }}>
-          📅 今日資料日期：{new Date().toLocaleDateString('zh-TW')}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--surface-color)', padding: '6px 16px', borderRadius: '20px', color: 'var(--accent-color)', fontWeight: 600, fontSize: '0.9rem', border: '1px solid var(--surface-border)' }}>
+          <span className="live-dot" />
+          <span>即時連線監控中</span>
+          <span style={{ color: 'var(--surface-border)' }}>|</span>
+          <span>📅 {new Date().toLocaleDateString('zh-TW')}</span>
         </div>
       </header>
 
@@ -258,7 +267,84 @@ export default function Home() {
         </button>
       </section>
 
-      {/* Advanced Selector */}
+      {/* Live Rebalance Additions & Deletions Radar Board */}
+      <section className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0.15s' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.4rem', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⚡ ETF 換股風向球 (預計/正在納入與剔除股票)
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+              時時追蹤法人持股增減、成分股調整預測與即時建倉/出清進度
+            </p>
+          </div>
+          <span style={{ fontSize: '0.8rem', padding: '4px 10px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid #10b981' }}>
+            🟢 實時連線比對中
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+          {/* Additions Column */}
+          <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <h4 style={{ color: '#10b981', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              📥 預計 / 正在納入股票 (加碼買進)
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {radarData.additions.map((item, idx) => (
+                <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{item.name}</strong>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.ticker}</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '4px' }}>
+                      目标 ETF: {item.etfId} {item.etfName}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#10b981' }}>
+                      +{item.estVolume.toLocaleString()} 張
+                    </div>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', marginTop: '4px', display: 'inline-block' }}>
+                      {item.status} ({item.confidence}%)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Deletions Column */}
+          <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            <h4 style={{ color: '#ef4444', margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              📤 預計 / 正在剔除股票 (減碼賣出)
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {radarData.deletions.map((item, idx) => (
+                <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{item.name}</strong>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.ticker}</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '4px' }}>
+                      目标 ETF: {item.etfId} {item.etfName}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ef4444' }}>
+                      -{item.estVolume.toLocaleString()} 張
+                    </div>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', marginTop: '4px', display: 'inline-block' }}>
+                      {item.status} ({item.confidence}%)
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
       {isSelectorOpen && (
         <section ref={selectorRef} className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -492,6 +578,33 @@ export default function Home() {
                         )}
                       </div>
                     </div>
+
+                    {/* ETF Specific Rebalance Additions & Deletions Cards */}
+                    {(holdingsData.rebalanceAdditions || holdingsData.rebalanceDeletions) && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                          <h4 style={{ color: '#10b981', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📥 本期預計/正在納入成員</h4>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {holdingsData.rebalanceAdditions.map((item, idx) => (
+                              <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #10b981', color: '#10b981', fontSize: '0.8rem' }}>
+                                + {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                          <h4 style={{ color: '#ef4444', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📤 本期預計/正在剔除成員</h4>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {holdingsData.rebalanceDeletions.map((item, idx) => (
+                              <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.8rem' }}>
+                                - {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   );
                 })()}
 
