@@ -555,56 +555,58 @@ export default function Home() {
                   const catInfo = getEtfCategoryInfo(holdingsData.type, holdingsData.category);
                   const isRebalNow = isRebalancingMonth(holdingsData.rebalanceMonths);
                   return (
-                    <div style={{ marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                        <h2 style={{ fontSize: '2rem', margin: 0, color: catInfo.color }}>
-                          {holdingsData.name} ({holdingsData.etfId})
-                        </h2>
-                        <span style={{ 
-                          padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
-                          background: catInfo.bg, color: catInfo.color, border: `1px solid ${catInfo.border}`
-                        }}>
-                          {catInfo.emoji} {catInfo.label}
-                        </span>
-                      </div>
-
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <span>發行券商：<strong style={{ color: '#fff' }}>{holdingsData.issuer}</strong></span>
-                        <span>📅 預計換股月份：<strong style={{ color: '#fff' }}>{getRebalanceText(holdingsData.rebalanceMonths)}</strong></span>
-                        {isRebalNow && (
-                          <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#ef4444', color: '#fff', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                            🚨 本月預計進行持股調整 / 換股！
+                    <>
+                      <div style={{ marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                          <h2 style={{ fontSize: '2rem', margin: 0, color: catInfo.color }}>
+                            {holdingsData.name} ({holdingsData.etfId})
+                          </h2>
+                          <span style={{ 
+                            padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
+                            background: catInfo.bg, color: catInfo.color, border: `1px solid ${catInfo.border}`
+                          }}>
+                            {catInfo.emoji} {catInfo.label}
                           </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* ETF Specific Rebalance Additions & Deletions Cards */}
-                    {(holdingsData.rebalanceAdditions || holdingsData.rebalanceDeletions) && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                          <h4 style={{ color: '#10b981', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📥 本期預計/正在納入成員</h4>
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {holdingsData.rebalanceAdditions.map((item, idx) => (
-                              <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #10b981', color: '#10b981', fontSize: '0.8rem' }}>
-                                + {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
-                              </span>
-                            ))}
-                          </div>
                         </div>
 
-                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                          <h4 style={{ color: '#ef4444', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📤 本期預計/正在剔除成員</h4>
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {holdingsData.rebalanceDeletions.map((item, idx) => (
-                              <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.8rem' }}>
-                                - {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
-                              </span>
-                            ))}
-                          </div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span>發行券商：<strong style={{ color: '#fff' }}>{holdingsData.issuer}</strong></span>
+                          <span>📅 預計換股月份：<strong style={{ color: '#fff' }}>{getRebalanceText(holdingsData.rebalanceMonths)}</strong></span>
+                          {isRebalNow && (
+                            <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#ef4444', color: '#fff', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                              🚨 本月預計進行持股調整 / 換股！
+                            </span>
+                          )}
                         </div>
                       </div>
-                    )}
+
+                      {/* ETF Specific Rebalance Additions & Deletions Cards */}
+                      {(holdingsData.rebalanceAdditions || holdingsData.rebalanceDeletions) && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            <h4 style={{ color: '#10b981', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📥 本期預計/正在納入成員</h4>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {holdingsData.rebalanceAdditions.map((item, idx) => (
+                                <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #10b981', color: '#10b981', fontSize: '0.8rem' }}>
+                                  + {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                            <h4 style={{ color: '#ef4444', margin: '0 0 10px 0', fontSize: '0.95rem' }}>📤 本期預計/正在剔除成員</h4>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {holdingsData.rebalanceDeletions.map((item, idx) => (
+                                <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.4)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.8rem' }}>
+                                  - {item.name} ({item.ticker}) <small style={{ color: 'var(--text-secondary)' }}>{item.status}</small>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   );
                 })()}
 
