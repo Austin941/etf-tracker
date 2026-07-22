@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 export default function Home() {
   const [etfs, setEtfs] = useState([]);
@@ -9,6 +9,25 @@ export default function Home() {
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [viewingEtf, setViewingEtf] = useState(null);
   const [holdingsData, setHoldingsData] = useState(null);
+  const [expandedStocks, setExpandedStocks] = useState(new Set());
+  const selectorRef = useRef(null);
+
+  // Click outside to collapse custom selector
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+        setIsSelectorOpen(false);
+      }
+    };
+    if (isSelectorOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isSelectorOpen]);
 
   // Fetch ETF list on mount
   useEffect(() => {
@@ -79,6 +98,13 @@ export default function Home() {
       newSet.add(id);
     }
     setSelectedEtfIds(newSet);
+  };
+
+  const toggleExpandStock = (ticker) => {
+    const newSet = new Set(expandedStocks);
+    if (newSet.has(ticker)) newSet.delete(ticker);
+    else newSet.add(ticker);
+    setExpandedStocks(newSet);
   };
 
   const handleViewEtf = async (id) => {
@@ -152,7 +178,7 @@ export default function Home() {
 
       {/* Advanced Selector */}
       {isSelectorOpen && (
-        <section className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0s' }}>
+        <section ref={selectorRef} className="glass-panel animate-fade-in" style={{ marginBottom: '32px', animationDelay: '0s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1.2rem', margin: 0 }}>依發行券商勾選</h3>
             <button onClick={() => handleSelectPreset('clear')} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>清除全部</button>
@@ -267,14 +293,14 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="stock-right-panel" style={{ marginLeft: '24px', textAlign: 'right', minWidth: '250px' }}>
+                <div className="stock-right-panel" style={{ marginLeft: '24px', textAlign: 'right', minWidth: '250px', maxWidth: '60%' }}>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981', marginBottom: '8px' }}>
                     +{Math.round(buy.totalNetBuys / 1000).toLocaleString()} 張
                   </div>
                   
-                  {/* ETF Badges */}
+                  {/* ETF Badges with Expand / Collapse */}
                   <div className="badges" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    {buy.boughtBy.map(b => (
+                    {(expandedStocks.has(buy.ticker) ? buy.boughtBy : buy.boughtBy.slice(0, 6)).map(b => (
                       <span 
                         key={b.etfId} 
                         onClick={() => handleViewEtf(b.etfId)}
@@ -289,6 +315,21 @@ export default function Home() {
                         🔍 {b.etfId} {b.etfName}
                       </span>
                     ))}
+
+                    {buy.boughtBy.length > 6 && (
+                      <button 
+                        onClick={() => toggleExpandStock(buy.ticker)}
+                        style={{
+                          fontSize: '0.7rem', padding: '4px 8px', borderRadius: '4px',
+                          background: 'rgba(255,255,255,0.1)', color: 'var(--accent-color)',
+                          border: '1px solid var(--surface-border)', cursor: 'pointer', fontWeight: 600
+                        }}
+                      >
+                        {expandedStocks.has(buy.ticker) 
+                          ? '收起 ▲' 
+                          : `+${buy.boughtBy.length - 6} 檔 ETF ▼`}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
