@@ -9,6 +9,8 @@ export default function Home() {
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [viewingEtf, setViewingEtf] = useState(null);
   const [holdingsData, setHoldingsData] = useState(null);
+  const [sortKey, setSortKey] = useState('weight');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [expandedStocks, setExpandedStocks] = useState(new Set());
   const selectorRef = useRef(null);
 
@@ -110,6 +112,8 @@ export default function Home() {
   const handleViewEtf = async (id) => {
     setViewingEtf(id);
     setHoldingsData(null);
+    setSortKey('weight');
+    setSortOrder('desc');
     try {
       const res = await fetch(`/api/etf-holdings?id=${id}`);
       if (res.ok) {
@@ -120,6 +124,36 @@ export default function Home() {
       console.error(err);
     }
   };
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortKey(key);
+      setSortOrder('desc');
+    }
+  };
+
+  const sortedHoldings = useMemo(() => {
+    if (!holdingsData || !holdingsData.holdings) return [];
+    return [...holdingsData.holdings].sort((a, b) => {
+      let valA = a[sortKey];
+      let valB = b[sortKey];
+
+      if (sortKey === 'weight') {
+        valA = parseFloat(valA);
+        valB = parseFloat(valB);
+      } else if (typeof valA === 'string') {
+        return sortOrder === 'asc' 
+          ? valA.localeCompare(valB, 'zh-TW') 
+          : valB.localeCompare(valA, 'zh-TW');
+      }
+
+      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [holdingsData, sortKey, sortOrder]);
 
   return (
     <main style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -377,17 +411,30 @@ export default function Home() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>股票名稱</th>
-                        <th style={{ padding: '12px' }}>權重 (%)</th>
-                        <th style={{ padding: '12px' }}>目前持股 (張)</th>
-                        <th style={{ padding: '12px' }}>1日增減</th>
-                        <th style={{ padding: '12px' }}>3日增減</th>
-                        <th style={{ padding: '12px' }}>5日增減</th>
-                        <th style={{ padding: '12px' }}>10日增減</th>
+                        {[
+                          { key: 'name', label: '股票名稱', align: 'left' },
+                          { key: 'weight', label: '權重 (%)', align: 'right' },
+                          { key: 'currentShares', label: '目前持股 (張)', align: 'right' },
+                          { key: 'diff1d', label: '1日增減', align: 'right' },
+                          { key: 'diff3d', label: '3日增減', align: 'right' },
+                          { key: 'diff5d', label: '5日增減', align: 'right' },
+                          { key: 'diff10d', label: '10日增減', align: 'right' },
+                        ].map(col => (
+                          <th 
+                            key={col.key}
+                            onClick={() => handleSort(col.key)}
+                            style={{ 
+                              padding: '12px', textAlign: col.align, cursor: 'pointer',
+                              userSelect: 'none', color: sortKey === col.key ? 'var(--accent-color)' : 'var(--text-secondary)'
+                            }}
+                          >
+                            {col.label} {sortKey === col.key ? (sortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {holdingsData.holdings.map(h => {
+                      {sortedHoldings.map(h => {
                         const renderDiff = (val) => {
                           if (val > 0) return <span style={{ color: '#ef4444', fontWeight: 'bold' }}>+{val.toLocaleString()}</span>;
                           if (val < 0) return <span style={{ color: '#10b981', fontWeight: 'bold' }}>{val.toLocaleString()}</span>;
